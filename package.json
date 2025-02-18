@@ -1,0 +1,33 @@
+{
+  "name": "course-management-system-be",
+  "version": "1.0.0",
+  "description": "course management system backend",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "migrate-up": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ppauljonathan/course-management-system-be.git"
+  },
+  "author": "ppauljonathan",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/ppauljonathan/course-management-system-be/issues"
+  },
+  "homepage": "https://github.com/ppauljonathan/course-management-system-be#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.13.3",
+    "pg-hstore": "^2.3.4",
+    "postgres-migrations": "^5.3.0",
+    "sequelize": "^6.37.5"
+  },
+  "type": "module"
+}
