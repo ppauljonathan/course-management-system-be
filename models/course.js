@@ -1,18 +1,45 @@
 'use strict';
 
 const db = require('../config/database');
+const { PER_PAGE, MAX_PER_PAGE } = require('../constants')
 
 const calculateCurrentTime = () => new Date();
 
-const findAll = async () => {
+const findAll = async (page = 1, per = PER_PAGE) => {
+    per = Math.min(per, MAX_PER_PAGE);
+
     const result = await db.query(
         `
             SELECT * FROM courses
             WHERE deleted_at IS NULL
             ORDER BY id ASC
-        `
+            LIMIT $1
+            OFFSET $2
+        `,
+        [
+            per,
+            (page - 1) * per
+        ]
     );
     return result.rows;
+};
+
+const pageInfo = async (page = 1, per = PER_PAGE) => {
+    per = Math.min(per, MAX_PER_PAGE);
+
+    const result = await db.query(
+        `SELECT COUNT(id) FROM courses WHERE deleted_at IS NULL`,
+        []
+    );
+
+    const count = result.rows[0].count;
+
+    return {
+        page: page,
+        per: per,
+        totalRecords: count,
+        totalPages: Math.max(1, Math.ceil(count / per))
+    };
 };
 
 const find = async (id) => {
@@ -65,4 +92,4 @@ const destroy = async (id) => {
     return result.rows[0] || null;
 };
 
-module.exports = { findAll, find, create, update, destroy };
+module.exports = { findAll, find, create, update, destroy, pageInfo };
