@@ -1,0 +1,31 @@
+{
+  "name": "course-management-system-be",
+  "version": "1.0.0",
+  "description": "BE for Course Management System",
+  "homepage": "https://github.com/ppauljonathan/course-management-system-be#readme",
+  "bugs": {
+    "url": "https://github.com/ppauljonathan/course-management-system-be/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ppauljonathan/course-management-system-be.git"
+  },
+  "license": "GNU GENERAL PUBLIC LICENSE",
+  "author": "P Paul Jonathan",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "dependencies": {
+    "db-migrate": "^0.11.14",
+    "db-migrate-pg": "^1.5.2",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.13.3"
+  }
+}
