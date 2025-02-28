@@ -7,6 +7,10 @@ const db = require('./config/database');
 configDotenv();
 const app = express();
 
+app.get('/', async (req, res, next) => {
+    res.send("Hello World");
+})
+
 db.connect()
   .then(() => {
       console.log('Connected to DB');
@@ -14,4 +18,3 @@ db.connect()
           console.log('Listening on 3000');
       });
   });
-
