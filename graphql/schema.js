@@ -2,18 +2,16 @@
 
 const { buildSchema } = require('graphql');
 
-const { pageInfoType, paginationResponseType } = require('./common/paginationResponse');
-const { userErrorType } = require('./common/userError');
+const commonTypes = require('./common/types');
 
-const { courseType } = require('./course/type');
-const { courseQueries } = require('./course/queries');
-const { courseMutations } = require('./course/mutations');
+const courseTypes = require('./course/types');
+const courseQueries = require('./course/queries');
+const courseInputTypes = require('./course/inputTypes');
+const courseMutations = require('./course/mutations');
 
 const types = `
-  ${pageInfoType}
-  ${userErrorType}
-  ${paginationResponseType}
-  ${courseType}
+  ${commonTypes}
+  ${courseTypes}
 `
 
 const queries = `
@@ -22,12 +20,16 @@ const queries = `
   }
 `
 
+const inputTypes = `
+  ${courseInputTypes}
+`
+
 const mutations = `
   type Mutation {
     ${courseMutations}
   }
 `
 
-const schemaString = types + queries + mutations
+const schemaString = types + queries + inputTypes + mutations;
 
 module.exports.schema = buildSchema(schemaString);

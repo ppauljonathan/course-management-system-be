@@ -2,6 +2,7 @@
 
 const db = require('../config/database');
 const { PER_PAGE, MAX_PER_PAGE } = require('../constants')
+const { courseCreationValidator, courseUpdationValidator } = require('../validators/course')
 
 const calculateCurrentTime = () => new Date();
 
@@ -54,6 +55,12 @@ const find = async (id) => {
 };
 
 const create = async ({ name, description, price }) => {
+    const errors = courseCreationValidator({ name, description, price });
+
+    if (errors.length != 0) {
+        return { errors }
+    }
+
     const currentTime = calculateCurrentTime();
     const result = await db.query(
         `
@@ -63,10 +70,18 @@ const create = async ({ name, description, price }) => {
         `,
         [name, description, price, currentTime, currentTime]
     );
-    return result.rows[0];
+    const course = result.rows[0]
+
+    return { course, errors };
 };
 
 const update = async ({ id, name, description, price }) => {
+    const errors = courseUpdationValidator({ id, name, description, price });
+
+    if (errors.length != 0) {
+        return { errors }
+    }
+
     const result = await db.query(
         `
             UPDATE courses
@@ -76,7 +91,9 @@ const update = async ({ id, name, description, price }) => {
         `,
         [name, description, price, calculateCurrentTime(), id]
     );
-    return result.rows[0] || null;
+    const course = result.rows[0] ||null;
+
+    return { course, errors };
 };
 
 const destroy = async (id) => {
@@ -89,7 +106,9 @@ const destroy = async (id) => {
         `,
         [calculateCurrentTime(), id]
     );
-    return result.rows[0] || null;
+    const course = result.rows[0] ||null;
+
+    return { course, errors: [] };
 };
 
 module.exports = { findAll, find, create, update, destroy, pageInfo };

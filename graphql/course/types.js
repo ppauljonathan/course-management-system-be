@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports.courseType = `
+const courseType = `
   type Course {
     id: ID!
     name: String!
@@ -9,9 +9,19 @@ module.exports.courseType = `
     created_at: String!
     updated_at: String!
   }
+`
 
+const courseMutationResponseType = `
   type CourseMutationResponse {
     course: Course
-    userErrors: [UserError]
+    errors: [Error]
   }
 `
+
+
+
+const types =
+  courseType +
+  courseMutationResponseType;
+
+module.exports = types;

@@ -1,7 +1,9 @@
 'use strict';
 
-module.exports.courseMutations = `
-  courseCreate: CourseMutationResponse!
-  courseUpdate: CourseMutationResponse!
-  courseDelete: CourseMutationResponse!
+const mutations = `
+  courseCreate(course: CourseCreateInput!): CourseMutationResponse!
+  courseUpdate(course: CourseUpdateInput!): CourseMutationResponse!
+  courseDelete(id: ID!): CourseMutationResponse!
 `;
+
+module.exports = mutations;
