@@ -1,25 +1,33 @@
 'use strict';
 
 const Course = require('../../models/course');
+const { getAuthenticatedUser } = require('../../services/auth')
 
-const resolvers = {
-  async courses({ page, per }) {
-    const courses = await Course.findAll(page, per);
-    const pageInfo = await Course.pageInfo(page, per);
-    return { courses, pageInfo };
-  },
-  async course({ id }) {
-    return await Course.find(id);
-  },
-  async courseCreate({ course }) {
-    return await Course.create(course);
-  },
-  async courseUpdate({ course }) {
-    return await Course.update(course);
-  },
-  async courseDelete({ id }) {
-    return await Course.destroy(id);
-  }
-}
+const courses = async ({page, per}, context) => {
+  getAuthenticatedUser(context);
+  return await Course.findAll(page, per);
+};
+
+const course = async ({ id }, context) => {
+  getAuthenticatedUser(context);
+  return await Course.find(id);
+};
+
+const courseCreate = async ({ course }, context) => {
+  getAuthenticatedUser(context);
+  return await Course.create(course);
+};
+
+const courseUpdate = async ({ course }, context) => {
+  getAuthenticatedUser();
+  return await Course.update(course);
+};
+
+const courseDelete = async ({ id }, context) => {
+  getAuthenticatedUser(context);
+  return await Course.destroy(id);
+};
+
+const resolvers = { courses, course, courseCreate, courseUpdate, courseDelete }
 
 module.exports = resolvers;

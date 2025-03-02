@@ -1,1 +1,1 @@
-DROP TABLE courses;
+DROP TABLE IF EXISTS courses;

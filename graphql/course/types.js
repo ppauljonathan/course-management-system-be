@@ -9,19 +9,20 @@ const courseType = `
     created_at: String!
     updated_at: String!
   }
-`
+`;
 
 const courseMutationResponseType = `
   type CourseMutationResponse {
     course: Course
     errors: [Error]
   }
-`
+`;
 
 
 
 const types =
   courseType +
-  courseMutationResponseType;
+  courseMutationResponseType
+;
 
 module.exports = types;
