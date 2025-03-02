@@ -7,6 +7,7 @@ const { ruruHTML } = require('ruru/server');
 const db = require('./config/database');
 const { schema } = require('./graphql/schema');
 const { rootValue } = require('./graphql/rootValue');
+const { context } = require('./graphql/context');
 const { PORT } = require('./constants');
 const { authenticateUser } = require('./services/auth');
 
@@ -21,7 +22,7 @@ app.all(
 	createHandler({
 		schema: schema,
 		rootValue: rootValue,
-		context: (req) => ({ user: req.raw.user })
+		context: context
 	}),
 );
 
