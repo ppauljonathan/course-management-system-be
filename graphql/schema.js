@@ -41,4 +41,6 @@ const mutations = `
 
 const schemaString = types + queries + inputTypes + mutations;
 
+// console.log("DEBUG MODE: SCHEMA: ", schemaString);
+
 module.exports.schema = buildSchema(schemaString);

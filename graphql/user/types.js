@@ -23,6 +23,7 @@ const userWithResetTokenType = `
   type UserWithResetToken {
     user: User
     token: String
+    expires_at: String
     errors: [Error]
   }
 `;

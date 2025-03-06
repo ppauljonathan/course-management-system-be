@@ -33,6 +33,39 @@ module.exports.login = async ({ email, password }) => {
 
 	const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET);
 	return { user, jwt: token, errors };
+};
+
+module.exports.generateResetPasswordToken = async ({ email }) => {
+	const user = await User.findByEmail(email);
+
+	if(user === null) {
+		return {
+			errors: [{ status: 404, message: 'Email Not Found', location: 'email' }]
+		};
+	}
+
+	const { user: userWithResetToken, errors } = await User.generateResetPasswordToken(user.id);
+
+	return {
+		user: userWithResetToken,
+		token: userWithResetToken?.reset_token,
+		expires_at: userWithResetToken?.reset_token_expires_at,
+		errors: errors
+	}
+};
+
+module.exports.resetPassword = async (userData) => {
+	const passwordErrors = validatePassword(userData);
+	if (passwordErrors.length != 0) { return { errors: passwordErrors }; }
+
+	const salt = await bcrypt.genSalt(BCRYPT_SALT_ROUNDS);
+	userData.password_hash = await bcrypt.hash(userData.password, salt);
+
+	const { user, errors } = await User.resetPassword(userData);
+	if (errors.length != 0) { return { errors }; }
+
+	const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET);
+	return { user, jwt: token, errors };
 }
 
 module.exports.authenticateUser = async (req, res, next) => {
@@ -52,7 +85,7 @@ module.exports.authenticateUser = async (req, res, next) => {
 	req.user = user;
 
 	next();
-}
+};
 
 module.exports.getAuthenticatedUser = (context) => {
   if (!context.user) {

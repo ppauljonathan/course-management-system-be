@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "date-fns": "^4.1.0",
     "db-migrate": "^0.11.14",
     "db-migrate-pg": "^1.5.2",
     "dotenv": "^16.4.7",
@@ -31,6 +32,7 @@
     "graphql": "^16.10.0",
     "graphql-http": "^1.22.4",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.13.3"
+    "pg": "^8.13.3",
+    "rand-token": "^1.0.1"
   }
 }

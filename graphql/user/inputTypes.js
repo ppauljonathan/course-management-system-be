@@ -17,9 +17,25 @@ const loginInputType = `
   }
 `;
 
+const requestPasswordResetInputType = `
+  input RequestPasswordResetInput {
+    email: String!
+  }
+`;
+
+const resetPasswordInputType = `
+  input ResetPasswordInput {
+    token: String!
+    password: String!
+    password_confirmation: String!
+  }
+`;
+
 const inputTypes =
   signupInputType +
-  loginInputType
+  loginInputType +
+  requestPasswordResetInputType +
+  resetPasswordInputType
 ;
 
 module.exports = inputTypes;
