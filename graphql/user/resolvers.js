@@ -24,6 +24,10 @@ const resetPassword = async({ input }, context) => {
   return await AuthService.resetPassword(input);
 }
 
-const resolvers = { signup, login, requestPasswordReset, resetPassword };
+const me = (_inp, context) => {
+  return context.user
+}
+
+const resolvers = { signup, login, requestPasswordReset, resetPassword, me };
 
 module.exports = resolvers;

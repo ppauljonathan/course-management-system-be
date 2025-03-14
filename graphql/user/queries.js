@@ -1,5 +1,7 @@
 'use strict';
 
-const queries = "";
+const queries = `
+  me:User
+`;
 
 module.exports = queries;

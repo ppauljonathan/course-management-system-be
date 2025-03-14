@@ -76,11 +76,7 @@ module.exports.authenticateUser = async (req, res, next) => {
 	if(token === undefined || !token) { return next(); }
 
 	const user = await getUserFromToken(token);
-	if(user === null) {
-		return res.json({
-			errors: [{ status: 401, message: 'Invalid Token', location: 'user_auth' }]
-		}).status(401);
-	}
+	if(user === null) { return next(); }
 
 	req.user = user;
 

@@ -3,6 +3,8 @@
 const express = require('express');
 const { createHandler } = require('graphql-http/lib/use/express');
 const { ruruHTML } = require('ruru/server');
+const morgan = require('morgan');
+const cors = require('cors');
 
 const db = require('./config/database');
 const { schema } = require('./graphql/schema');
@@ -12,6 +14,10 @@ const { PORT } = require('./constants');
 const { authenticateUser } = require('./services/auth');
 
 const app = express();
+
+app.use(cors());
+
+app.use(morgan('combined'));
 
 app.use(express.json());
 
