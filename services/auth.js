@@ -24,10 +24,15 @@ module.exports.signup = async (userData) => {
 
 module.exports.login = async ({ email, password }) => {
 	const user = await User.findByEmail(email);
-	const passwordVerification = await bcrypt.compare(password, user.password_hash);
 	const errors = [];
+	if(user === null) {
+		errors.push({ status: 404, message: 'Email Not Found', location: 'email' })
+		return { errors };
+	}
+
+	const passwordVerification = await bcrypt.compare(password, user.password_hash);
 	if (!passwordVerification) {
-		errors.push({ code: 401, message: 'invalid email or password', location: 'password' });
+		errors.push({ code: 401, message: 'incorrect password', location: 'password' });
 		return { errors };
 	}
 
