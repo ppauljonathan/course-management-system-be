@@ -73,21 +73,6 @@ module.exports.resetPassword = async (userData) => {
 	return { user, jwt: token, errors };
 }
 
-module.exports.authenticateUser = async (req, res, next) => {
-	const authHeader = req.headers['authorization'];
-	if(authHeader === undefined || !authHeader) { return next(); }
-
-	const token = authHeader.split(' ')[1];
-	if(token === undefined || !token) { return next(); }
-
-	const user = await getUserFromToken(token);
-	if(user === null) { return next(); }
-
-	req.user = user;
-
-	next();
-};
-
 module.exports.getAuthenticatedUser = (context) => {
   if (!context.user) {
     const error = new Error('Unauthenticated');
@@ -106,7 +91,7 @@ module.exports.ensureUserNotAuthenticated = (context) => {
 };
 
 
-const getUserFromToken = async(token) => {
+module.exports.getUserFromToken = async(token) => {
 	try {
 		const { id, email } = jwt.verify(token, JWT_SECRET);
 		let user = await User.find(id);
