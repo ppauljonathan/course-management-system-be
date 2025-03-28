@@ -3,9 +3,8 @@
 const Course = require('../../models/course');
 const { getAuthenticatedUser } = require('../../services/auth')
 
-const courses = async ({page, per}, context) => {
-  getAuthenticatedUser(context);
-  return await Course.findAll(page, per);
+const courses = async ({page, per}) => {
+    return await Course.findAll(page, per);
 };
 
 const course = async ({ id }, context) => {
@@ -19,7 +18,7 @@ const courseCreate = async ({ course }, context) => {
 };
 
 const courseUpdate = async ({ course }, context) => {
-  getAuthenticatedUser();
+  getAuthenticatedUser(context);
   return await Course.update(course);
 };
 
