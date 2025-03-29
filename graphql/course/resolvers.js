@@ -4,8 +4,24 @@ const Course = require('../../models/course');
 const { getAuthenticatedUser } = require('../../services/auth')
 
 const courses = async ({page, per}) => {
-    return await Course.findAll(page, per);
+  return await Course.findAll(page, per);
 };
+
+const purchasedCourses = async({page, per}) => {
+  return {
+    courses: [],
+    pageInfo: {
+    }
+  }
+}
+
+const createdCourses = async({page, per}) => {
+  return {
+    courses: [],
+    pageInfo: {
+    }
+  }
+}
 
 const course = async ({ id }, context) => {
   getAuthenticatedUser(context);
@@ -27,6 +43,14 @@ const courseDelete = async ({ id }, context) => {
   return await Course.destroy(id);
 };
 
-const resolvers = { courses, course, courseCreate, courseUpdate, courseDelete }
+const resolvers = {
+  courses,
+  purchasedCourses,
+  createdCourses,
+  course,
+  courseCreate,
+  courseUpdate,
+  courseDelete
+}
 
 module.exports = resolvers;
