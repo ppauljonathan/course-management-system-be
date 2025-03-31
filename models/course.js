@@ -16,6 +16,19 @@ module.exports.findAll = async (page = 1, per = PER_PAGE) => {
   );
 };
 
+module.exports.findByUserId = async (userId, page = 1, per = PER_PAGE) => {
+  return findWithPagination(
+    'courses',
+    `
+      user_id = $1 AND
+      deleted_at IS NULL
+    `,
+    [userId],
+    page,
+    per
+  );
+};
+
 module.exports.find = async (id) => {
   const result = await db.query(
     `

@@ -7,20 +7,22 @@ const courses = async ({page, per}) => {
   return await Course.findAll(page, per);
 };
 
-const purchasedCourses = async({page, per}) => {
+const purchasedCourses = async({page, per}, context) => {
+  getAuthenticatedUser(context);
   return {
     courses: [],
     pageInfo: {
+      page: page,
+      per: per,
+      totalPages: 1,
+      totalRecords: 0
     }
   }
 }
 
-const createdCourses = async({page, per}) => {
-  return {
-    courses: [],
-    pageInfo: {
-    }
-  }
+const createdCourses = async({page, per}, context) => {
+  getAuthenticatedUser(context);
+  return await Course.findByUserId(context.user.id, page, per);
 }
 
 const course = async ({ id }, context) => {
