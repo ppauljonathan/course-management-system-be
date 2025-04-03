@@ -32,12 +32,12 @@ const course = async ({ id }, context) => {
 
 const courseCreate = async ({ course }, context) => {
   getAuthenticatedUser(context);
-  return await Course.create(course);
+  return await Course.create(course, context.user.id);
 };
 
 const courseUpdate = async ({ course }, context) => {
   getAuthenticatedUser(context);
-  return await Course.update(course);
+  return await Course.update(course, context.user.id);
 };
 
 const courseDelete = async ({ id }, context) => {

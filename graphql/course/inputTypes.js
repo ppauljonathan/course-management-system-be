@@ -4,7 +4,8 @@ const courseCreateInputType = `
 	input CourseCreateInput {
 		name: String!,
 		description: String!,
-		price: String!
+		price: String!,
+    live: Boolean!
 	}
 `;
 
@@ -13,7 +14,8 @@ const courseUpdateInputType = `
 		id: ID!,
 		name: String!,
 		description: String!,
-		price: String!
+		price: String!,
+    live: Boolean,
 	}
 `;
 

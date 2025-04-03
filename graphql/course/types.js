@@ -8,6 +8,7 @@ const courseType = `
     price: Float!
     created_at: String!
     updated_at: String!
+    live: Boolean!
   }
 `;
 

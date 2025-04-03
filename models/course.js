@@ -9,8 +9,11 @@ const { calculateCurrentTime } = require('./concerns/time');
 module.exports.findAll = async (page = 1, per = PER_PAGE) => {
   return findWithPagination(
     'courses',
-    'deleted_at IS NULL',
-    [],
+    `
+      live = $1 AND
+      deleted_at IS NULL
+    `,
+    [true],
     page,
     per
   );
@@ -40,7 +43,7 @@ module.exports.find = async (id) => {
   return result.rows[0] || null;
 };
 
-module.exports.create = async ({ name, description, price }) => {
+module.exports.create = async ({ name, description, price, live }, userId) => {
   const errors = courseCreationValidator({ name, description, price });
 
   if (errors.length != 0) {
@@ -50,19 +53,19 @@ module.exports.create = async ({ name, description, price }) => {
   const currentTime = calculateCurrentTime();
   const result = await db.query(
     `
-      INSERT INTO courses (name, description, price, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO courses (name, description, price, created_at, updated_at, live, user_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `,
-    [name, description, price, currentTime, currentTime]
+    [name, description, price, currentTime, currentTime, live, userId]
   );
   const course = result.rows[0];
 
   return { course, errors };
 };
 
-module.exports.update = async ({ id, name, description, price }) => {
-  const errors = courseUpdationValidator({ id, name, description, price });
+module.exports.update = async ({ id, name, description, price, live }, userId) => {
+  const errors = await courseUpdationValidator({ id, name, description, price, userId });
 
   if (errors.length != 0) {
     return { errors };
@@ -71,11 +74,11 @@ module.exports.update = async ({ id, name, description, price }) => {
   const result = await db.query(
     `
       UPDATE courses
-      SET name = $1, description = $2, price = $3, updated_at = $4
-      WHERE id = $5 AND deleted_at IS NULL
+      SET name = $1, description = $2, price = $3, updated_at = $4, live = $5
+      WHERE id = $6 AND deleted_at IS NULL
       RETURNING *
     `,
-    [name, description, price, calculateCurrentTime(), id]
+    [name, description, price, calculateCurrentTime(), live, id]
   );
   const course = result.rows[0] || null;
 

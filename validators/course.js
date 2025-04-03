@@ -1,6 +1,7 @@
 'use strict';
 
 const { validatePresence, validateLength } = require('./commonValidators');
+const db = require('../config/database')
 
 module.exports.courseCreationValidator = ({ name, description, price }) => {
 	const errors = [];
@@ -15,9 +16,10 @@ module.exports.courseCreationValidator = ({ name, description, price }) => {
 	return errors;
 }
 
-module.exports.courseUpdationValidator = ({ id, name, description, price }) => {
+module.exports.courseUpdationValidator = async ({ id, name, description, price, userId }) => {
+
 	const errors = [];
-	validatePresence('id', name, errors);
+	validatePresence('id', id, errors);
 
 	validatePresence('name', name, errors);
 
@@ -26,5 +28,26 @@ module.exports.courseUpdationValidator = ({ id, name, description, price }) => {
 
 	validatePresence('price', price, errors);
 
+  await validateUserIsCreator(id, userId, errors)
+
 	return errors;
+}
+
+async function validateUserIsCreator(id, userId, errors) {
+  const query = `
+    SELECT user_id
+    FROM courses
+    WHERE courses.id = $1
+  `;
+  const result = await db.query(query, [id]);
+  const dbUserId = parseInt(result.rows[0].user_id, 10);
+
+  if(userId === dbUserId) { return; }
+
+
+  errors.push({
+    code: 422,
+    message: 'You are not authorized to create Courses',
+    location: 'name'
+  })
 }
