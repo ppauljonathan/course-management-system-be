@@ -11,7 +11,7 @@ module.exports.courseCreationValidator = ({ name, description, price }) => {
 	validatePresence('description', description, errors);
 	validateLength('description', description, { min: 10 }, errors);
 
-	validatePresence('price', price, errors);
+  validatePrice(price, errors);
 
 	return errors;
 }
@@ -26,11 +26,21 @@ module.exports.courseUpdationValidator = async ({ id, name, description, price, 
 	validatePresence('description', description, errors);
 	validateLength('description', description, { min: 10 }, errors);
 
-	validatePresence('price', price, errors);
+  validatePrice(price, errors);
 
   await validateUserIsCreator(id, userId, errors)
 
 	return errors;
+}
+
+function validatePrice(price, errors) {
+  if(typeof price === 'number' && price >= 0) { return; }
+
+  errors.push({
+		code: 422,
+		message: "price must be present and greater than or equal to 0",
+		location: "price"
+	});
 }
 
 async function validateUserIsCreator(id, userId, errors) {
