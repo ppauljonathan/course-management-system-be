@@ -5,9 +5,10 @@ const { PER_PAGE } = require('../constants');
 const { courseCreationValidator, courseUpdationValidator } = require('../validators/course');
 const { findWithPagination } = require('./concerns/pagination');
 const { calculateCurrentTime } = require('./concerns/time');
+const User = require('./user');
 
-module.exports.findAll = async (page = 1, per = PER_PAGE) => {
-  return findWithPagination(
+module.exports.findAll = async (page = 1, per = PER_PAGE, withUser = false) => {
+  const coursesData = await findWithPagination(
     'courses',
     `
       live = $1 AND
@@ -17,10 +18,14 @@ module.exports.findAll = async (page = 1, per = PER_PAGE) => {
     page,
     per
   );
+
+  if(!withUser) { return coursesData; }
+
+  coursesData.courses = await preloadUsers(coursesData.courses);
 };
 
-module.exports.findByUserId = async (userId, page = 1, per = PER_PAGE) => {
-  return findWithPagination(
+module.exports.findByUserId = async (userId, page = 1, per = PER_PAGE, withUser = false) => {
+  const coursesData = await findWithPagination(
     'courses',
     `
       user_id = $1 AND
@@ -30,9 +35,15 @@ module.exports.findByUserId = async (userId, page = 1, per = PER_PAGE) => {
     page,
     per
   );
+
+  if(!withUser) { return coursesData; }
+  const user = await User.find(userId);
+  coursesData.courses = coursesData.courses.map((course) => ({ ...course, user }));
+
+  return coursesData;
 };
 
-module.exports.find = async (id) => {
+module.exports.find = async (id, withUser = false) => {
   const result = await db.query(
     `
       SELECT * FROM courses
@@ -40,7 +51,15 @@ module.exports.find = async (id) => {
     `,
     [id]
   );
-  return result.rows[0] || null;
+  const course = result.rows[0] || null;
+
+  if(!course) { return; }
+  if(!withUser) { return course; }
+
+  const user = await User.find(course.user_id);
+  course.user = user;
+
+  return course;
 };
 
 module.exports.create = async ({ name, description, price, live }, userId) => {
@@ -99,3 +118,9 @@ module.exports.destroy = async (id) => {
 
   return { course, errors: [] };
 };
+
+async function preloadUsers(courses) {
+  const userIds = [... new Set(courses.map(c => c.user_id))];
+
+  return courses;
+}
