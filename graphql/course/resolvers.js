@@ -1,10 +1,14 @@
 'use strict';
 
-const Course = require('../../models/course');
-const { getAuthenticatedUser } = require('../../services/auth')
+const { parse } = require('graphql');
 
-const courses = async ({page, per}) => {
-  return await Course.findAll(page, per, true);
+const Course = require('../../models/course');
+const { getAuthenticatedUser } = require('../../services/auth');
+const { containsSelection } = require('../helpers');
+
+const courses = async ({page, per}, _context, info) => {
+  const withUser = containsSelection(info, 'user');
+  return await Course.findAll(page, per, withUser);
 };
 
 const purchasedCourses = async({page, per}, context) => {
@@ -20,14 +24,16 @@ const purchasedCourses = async({page, per}, context) => {
   }
 }
 
-const createdCourses = async({page, per}, context) => {
+const createdCourses = async({page, per}, context, info) => {
   getAuthenticatedUser(context);
-  return await Course.findByUserId(context.user.id, page, per, true);
+  const withUser = containsSelection(info, 'user');
+  return await Course.findByUserId(context.user.id, page, per, withUser);
 }
 
-const course = async ({ id }, context) => {
+const course = async ({ id }, context, info) => {
   getAuthenticatedUser(context);
-  return await Course.find(id, true);
+  const withUser = containsSelection(info, 'user');
+  return await Course.find(id, withUser);
 };
 
 const courseCreate = async ({ course }, context) => {
