@@ -2,6 +2,7 @@
 
 const db = require('../config/database');
 const { PER_PAGE } = require('../constants');
+const { dbLogger } = require('../services/db');
 const { courseCreationValidator, courseUpdationValidator } = require('../validators/course');
 const { findWithPagination } = require('./concerns/pagination');
 const { calculateCurrentTime } = require('./concerns/time');
@@ -22,6 +23,7 @@ module.exports.findAll = async (page = 1, per = PER_PAGE, withUser = false) => {
   if(!withUser) { return coursesData; }
 
   coursesData.courses = await preloadUsers(coursesData.courses);
+  return coursesData;
 };
 
 module.exports.findByUserId = async (userId, page = 1, per = PER_PAGE, withUser = false) => {
@@ -44,13 +46,15 @@ module.exports.findByUserId = async (userId, page = 1, per = PER_PAGE, withUser 
 };
 
 module.exports.find = async (id, withUser = false) => {
-  const result = await db.query(
-    `
-      SELECT * FROM courses
-      WHERE id = $1 AND deleted_at IS NULL
-    `,
-    [id]
-  );
+  const query = `
+    SELECT * FROM courses
+    WHERE id = $1 AND deleted_at IS NULL
+  `;
+  const variables = [id];
+
+  dbLogger(query, variables);
+
+  const result = await db.query(query, variables);
   const course = result.rows[0] || null;
 
   if(!course) { return; }
@@ -70,14 +74,17 @@ module.exports.create = async ({ name, description, price, live }, userId) => {
   }
 
   const currentTime = calculateCurrentTime();
-  const result = await db.query(
-    `
-      INSERT INTO courses (name, description, price, created_at, updated_at, live, user_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING *
-    `,
-    [name, description, price, currentTime, currentTime, live, userId]
-  );
+
+  const query = `
+    INSERT INTO courses (name, description, price, created_at, updated_at, live, user_id)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    RETURNING *
+  `;
+  const variables = [name, description, price, currentTime, currentTime, live, userId];
+
+  dbLogger(query, variables);
+
+  const result = await db.query(query, variables);
   const course = result.rows[0];
 
   return { course, errors };
@@ -90,30 +97,34 @@ module.exports.update = async ({ id, name, description, price, live }, userId) =
     return { errors };
   }
 
-  const result = await db.query(
-    `
-      UPDATE courses
-      SET name = $1, description = $2, price = $3, updated_at = $4, live = $5
-      WHERE id = $6 AND deleted_at IS NULL
-      RETURNING *
-    `,
-    [name, description, price, calculateCurrentTime(), live, id]
-  );
+  const query = `
+    UPDATE courses
+    SET name = $1, description = $2, price = $3, updated_at = $4, live = $5
+    WHERE id = $6 AND deleted_at IS NULL
+    RETURNING *
+  `;
+  const variables = [name, description, price, calculateCurrentTime(), live, id];
+
+  dbLogger(query, variables);
+
+  const result = await db.query(query, variables);
   const course = result.rows[0] || null;
 
   return { course, errors };
 };
 
 module.exports.destroy = async (id) => {
-  const result = await db.query(
-    `
-      UPDATE courses
-      SET deleted_at = $1
-      WHERE id = $2 AND deleted_at IS NULL
-      RETURNING *
-    `,
-    [calculateCurrentTime(), id]
-  );
+  const query = `
+    UPDATE courses
+    SET deleted_at = $1
+    WHERE id = $2 AND deleted_at IS NULL
+    RETURNING *
+  `;
+  const variables = [calculateCurrentTime(), id];
+
+  dbLogger(query, variables);
+
+  const result = await db.query(query, variables);
   const course = result.rows[0] || null;
 
   return { course, errors: [] };
@@ -122,5 +133,21 @@ module.exports.destroy = async (id) => {
 async function preloadUsers(courses) {
   const userIds = [... new Set(courses.map(c => c.user_id))];
 
+  const query = `
+    SELECT * FROM users
+    WHERE id = ANY($1)
+  `;
+  const variables = [userIds];
+
+  dbLogger(query, variables);
+
+  const result = await db.query(query, variables);
+
+  const users = result.rows;
+  const userIdMapping = users.reduce((acc, user) => {
+    acc[user.id] = user;
+    return acc;
+  }, {})
+  courses = courses.map((course) => ({ ...course, user: userIdMapping[course.user_id] }));
   return courses;
 }

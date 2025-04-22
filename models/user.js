@@ -8,6 +8,7 @@ const { PER_PAGE, RESET_TOKEN_LENGTH, RESET_TOKEN_EXPIRY_IN_HOURS } = require('.
 const { calculateCurrentTime } = require('./concerns/time');
 const { findWithPagination } = require('./concerns/pagination');
 const { userCreationValidator } = require('../validators/user');
+const { dbLogger } = require('../services/db');
 
 module.exports.findAll = async (page = 1, per = PER_PAGE) => {
 	return findWithPagination(
@@ -20,38 +21,43 @@ module.exports.findAll = async (page = 1, per = PER_PAGE) => {
 };
 
 module.exports.find = async (id) => {
-	const result = await db.query(
-		`
-			SELECT * FROM users
-			WHERE id = $1 AND deleted_at IS NULL
-		`,
-		[id]
-	);
+  const query = `
+    SELECT * FROM users
+    WHERE id = $1 AND deleted_at IS NULL
+  `;
+  const variables = [id];
+
+  dbLogger(query, variables);
+
+	const result = await db.query(query, variables);
 	return result.rows[0] || null;
 };
 
 module.exports.findByEmail = async (email) => {
-	const result = await db.query(
-		`
-			SELECT * FROM users
-			WHERE email = $1 AND deleted_at IS NULL
-		`,
-		[email]
-	);
+  const query = `
+    SELECT * FROM users
+    WHERE email = $1 AND deleted_at IS NULL
+  `;
+  const variables = [email]
+
+  dbLogger(query, variables);
+
+	const result = await db.query(query, variables);
 	return result.rows[0] || null;
 }
 
 module.exports.findByResetToken = async (token) => {
-	const result = await db.query(
-		`
-			SELECT * FROM users
-			WHERE reset_token = $1
-			AND reset_token_expires_at > NOW()
-			AND deleted_at IS NULL
-		`,
-		[token]
-	);
+  const query = `
+    SELECT * FROM users
+    WHERE reset_token = $1
+    AND reset_token_expires_at > NOW()
+    AND deleted_at IS NULL
+  `;
+  const variables = [token];
 
+  dbLogger(query, variables);
+
+	const result = await db.query(query, variables);
 	return result.rows[0] || null;
 }
 
@@ -60,21 +66,24 @@ module.exports.create = async (userData) => {
 	if (errors.length != 0) { return { errors }; }
 
 	const currentTime = calculateCurrentTime();
-	const result = await db.query(
-		`
-			INSERT INTO users (first_name, last_name, email, password_hash, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6)
-			RETURNING *
-		`,
-		[
-			userData.first_name,
-			userData.last_name,
-			userData.email,
-			userData.password_hash,
-			currentTime,
-			currentTime
-		]
-	);
+
+  const query = `
+    INSERT INTO users (first_name, last_name, email, password_hash, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING *
+  `;
+  const variables = [
+    userData.first_name,
+    userData.last_name,
+    userData.email,
+    userData.password_hash,
+    currentTime,
+    currentTime
+  ];
+
+  dbLogger(query, variables);
+
+	const result = await db.query(query, variables);
 	const user = result.rows[0]
 
 	return { user, errors: [] };
@@ -84,15 +93,18 @@ module.exports.generateResetPasswordToken = async (id) => {
 	const currentTime = calculateCurrentTime();
 	const resetTokenExpiresAt = addHours(currentTime, RESET_TOKEN_EXPIRY_IN_HOURS);
 	const resetToken = uid(RESET_TOKEN_LENGTH);
-	const result = await db.query(
-		`
-			UPDATE users
-			SET reset_token = $1, reset_token_expires_at = $2, updated_at = $3
-			WHERE id = $4 AND deleted_at IS NULL
-			RETURNING *
-		`,
-		[resetToken, resetTokenExpiresAt, currentTime, id]
-	);
+
+  const query = `
+    UPDATE users
+    SET reset_token = $1, reset_token_expires_at = $2, updated_at = $3
+    WHERE id = $4 AND deleted_at IS NULL
+    RETURNING *
+  `;
+  const variables = [resetToken, resetTokenExpiresAt, currentTime, id];
+
+  dbLogger(query, variables);
+
+	const result = await db.query(query, variables);
 
 	const user = result.rows[0] || null;
 
@@ -121,15 +133,17 @@ module.exports.resetPassword = async (userData) => {
 		return { errors };
 	}
 
-	const result = await db.query(
-		`
-			UPDATE users
-			SET password_hash = $1, reset_token = $2, reset_token_expires_at = $3, updated_at = $4
-			WHERE id = $5 AND deleted_at IS NULL
-			returning *
-		`,
-		[userData.password_hash, null, null, currentTime, user.id]
-	);
+  const query = `
+    UPDATE users
+    SET password_hash = $1, reset_token = $2, reset_token_expires_at = $3, updated_at = $4
+    WHERE id = $5 AND deleted_at IS NULL
+    returning *
+  `
+  const variables = [userData.password_hash, null, null, currentTime, user.id];
+
+  dbLogger(query, variables);
+
+	const result = await db.query(query, variables);
 	const updatedUser = result.rows[0];
 
 	return { user: updatedUser, errors };

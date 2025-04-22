@@ -2,7 +2,7 @@
 
 const db = require('../../config/database');
 const { PER_PAGE, MAX_PER_PAGE, DEFAULT_PAGE } = require('../../constants');
-const { validateTableName } = require('../../services/db');
+const { validateTableName, dbLogger } = require('../../services/db');
 
 module.exports.findWithPagination = async (
 	table,
@@ -20,6 +20,8 @@ module.exports.findWithPagination = async (
 		LIMIT ${per}
 		OFFSET ${(page - 1) * per}
   `;
+
+  dbLogger(query, conditionVars);
 
 	const result = await db.query(query, conditionVars);
 	const pageInfo = await this.pageInfo(
@@ -40,6 +42,9 @@ module.exports.pageInfo = async (
 		SELECT count(id) from ${validateTableName(table)}
 		WHERE ${conditionString}
 	`;
+
+  dbLogger(query, conditionVars);
+
 	const result = await db.query(query, conditionVars);
 
 	const count = parseInt(result.rows[0].count, 10);
