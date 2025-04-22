@@ -1,7 +1,7 @@
 'use strict';
 
 const db = require('../config/database');
-const { validateTableName, validateColumnName } = require('../services/db');
+const { validateTableName, validateColumnName, dbLogger } = require('../services/db');
 
 module.exports.validatePresence = (key, value, errors = []) => {
 	if (!!value) { return; }
@@ -51,8 +51,12 @@ module.exports.validateUniquness = async (key, value, tableName, errors = []) =>
 		WHERE
 			${validateColumnName(key)}=$1 AND
 			deleted_at IS NULL
-	`
-	const result = await db.query(query, [value]);
+	`;
+  const variables = [value];
+
+  dbLogger(query, variables);
+
+	const result = await db.query(query, variables);
 	const count = parseInt(result.rows[0].count, 10);
 
 	if(count == 0) { return; }

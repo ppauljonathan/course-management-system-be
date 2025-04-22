@@ -4,7 +4,7 @@ const Course = require('../../models/course');
 const { getAuthenticatedUser } = require('../../services/auth')
 
 const courses = async ({page, per}) => {
-  return await Course.findAll(page, per);
+  return await Course.findAll(page, per, true);
 };
 
 const purchasedCourses = async({page, per}, context) => {
@@ -22,12 +22,12 @@ const purchasedCourses = async({page, per}, context) => {
 
 const createdCourses = async({page, per}, context) => {
   getAuthenticatedUser(context);
-  return await Course.findByUserId(context.user.id, page, per);
+  return await Course.findByUserId(context.user.id, page, per, true);
 }
 
 const course = async ({ id }, context) => {
   getAuthenticatedUser(context);
-  return await Course.find(id);
+  return await Course.find(id, true);
 };
 
 const courseCreate = async ({ course }, context) => {

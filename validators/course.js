@@ -1,7 +1,8 @@
 'use strict';
 
 const { validatePresence, validateLength } = require('./commonValidators');
-const db = require('../config/database')
+const db = require('../config/database');
+const { dbLogger } = require('../services/db');
 
 module.exports.courseCreationValidator = ({ name, description, price }) => {
 	const errors = [];
@@ -49,7 +50,11 @@ async function validateUserIsCreator(id, userId, errors) {
     FROM courses
     WHERE courses.id = $1
   `;
-  const result = await db.query(query, [id]);
+  const variables = [id];
+
+  dbLogger(query, variables);
+
+  const result = await db.query(query, variables);
   const dbUserId = parseInt(result.rows[0].user_id, 10);
 
   if(userId === dbUserId) { return; }
