@@ -13,7 +13,7 @@ module.exports.validateTableName = (tableName) => validateIdentifier("table name
 module.exports.validateColumnName = (column) => validateIdentifier("column name", column);
 
 module.exports.dbLogger = (query = '', variables = []) => {
-  if(process.env.LOG_LEVEL == 2) {
+  if(process.env.LOG_LEVEL >= 2) {
     console.log(`[DB]
   [query]
     ${query}

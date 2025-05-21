@@ -9,7 +9,7 @@ module.exports.graphqlLogger = (req, res, next) => {
             console.log(`Variables: ${JSON.stringify(req.body.variables, null, 2)}`);
         }
 
-        if(process.env.LOG_LEVEL == 3) {
+        if(process.env.LOG_LEVEL >= 3) {
           console.log(`Headers: ${JSON.stringify(req.headers, null, 2)}`);
         }
         console.log('----------------------');
