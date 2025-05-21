@@ -10,7 +10,7 @@ module.exports.courseCreationValidator = ({ name, description, price }) => {
   validatePresence('name', name, errors);
 
   validatePresence('description', description, errors);
-  validateLength('description', description, { min: 10, max: 200 }, errors);
+  validateLength('description', description, { min: 10, max: 2000 }, errors);
 
   validatePrice(price, errors);
 
@@ -24,7 +24,7 @@ module.exports.courseUpdationValidator = async ({ id, name, description, price, 
   validatePresence('name', name, errors);
 
   validatePresence('description', description, errors);
-  validateLength('description', description, { min: 10, max: 200 }, errors);
+  validateLength('description', description, { min: 10, max: 2000 }, errors);
 
   validatePrice(price, errors);
 
