@@ -66,8 +66,8 @@ module.exports.find = async (id, withUser = false) => {
   return course;
 };
 
-module.exports.create = async ({ name, description, price, live }, userId) => {
-  const errors = courseCreationValidator({ name, description, price });
+module.exports.create = async ({ name, description, live }, userId) => {
+  const errors = courseCreationValidator({ name, description });
 
   if (errors.length != 0) {
     return { errors };
@@ -76,11 +76,11 @@ module.exports.create = async ({ name, description, price, live }, userId) => {
   const currentTime = calculateCurrentTime();
 
   const query = `
-    INSERT INTO courses (name, description, price, created_at, updated_at, live, user_id)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    INSERT INTO courses (name, description, created_at, updated_at, live, user_id)
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *
   `;
-  const variables = [name, description, price, currentTime, currentTime, live, userId];
+  const variables = [name, description, currentTime, currentTime, live, userId];
 
   dbLogger(query, variables);
 
@@ -90,8 +90,8 @@ module.exports.create = async ({ name, description, price, live }, userId) => {
   return { course, errors };
 };
 
-module.exports.update = async ({ id, name, description, price, live }, userId) => {
-  const errors = await courseUpdationValidator({ id, name, description, price, userId });
+module.exports.update = async ({ id, name, description, live }, userId) => {
+  const errors = await courseUpdationValidator({ id, name, description, userId });
 
   if (errors.length != 0) {
     return { errors };
@@ -99,11 +99,11 @@ module.exports.update = async ({ id, name, description, price, live }, userId) =
 
   const query = `
     UPDATE courses
-    SET name = $1, description = $2, price = $3, updated_at = $4, live = $5
-    WHERE id = $6 AND deleted_at IS NULL
+    SET name = $1, description = $2, updated_at = $3, live = $4
+    WHERE id = $5 AND deleted_at IS NULL
     RETURNING *
   `;
-  const variables = [name, description, price, calculateCurrentTime(), live, id];
+  const variables = [name, description, calculateCurrentTime(), live, id];
 
   dbLogger(query, variables);
 

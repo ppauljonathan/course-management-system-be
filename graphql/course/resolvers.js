@@ -11,19 +11,6 @@ const courses = async ({page, per}, _context, info) => {
   return await Course.findAll(page, per, withUser);
 };
 
-const purchasedCourses = async({page, per}, context) => {
-  getAuthenticatedUser(context);
-  return {
-    courses: [],
-    pageInfo: {
-      page: page,
-      per: per,
-      totalPages: 1,
-      totalRecords: 0
-    }
-  }
-}
-
 const createdCourses = async({page, per}, context, info) => {
   getAuthenticatedUser(context);
   const withUser = containsSelection(info, 'user');
@@ -53,7 +40,6 @@ const courseDelete = async ({ id }, context) => {
 
 const resolvers = {
   courses,
-  purchasedCourses,
   createdCourses,
   course,
   courseCreate,

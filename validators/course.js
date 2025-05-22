@@ -4,7 +4,7 @@ const { validatePresence, validateLength } = require('./commonValidators');
 const db = require('../config/database');
 const { dbLogger } = require('../services/db');
 
-module.exports.courseCreationValidator = ({ name, description, price }) => {
+module.exports.courseCreationValidator = ({ name, description }) => {
   const errors = [];
 
   validatePresence('name', name, errors);
@@ -12,12 +12,10 @@ module.exports.courseCreationValidator = ({ name, description, price }) => {
   validatePresence('description', description, errors);
   validateLength('description', description, { min: 10, max: 2000 }, errors);
 
-  validatePrice(price, errors);
-
   return errors;
 }
 
-module.exports.courseUpdationValidator = async ({ id, name, description, price, userId }) => {
+module.exports.courseUpdationValidator = async ({ id, name, description, userId }) => {
   const errors = [];
   validatePresence('id', id, errors);
 
@@ -26,21 +24,9 @@ module.exports.courseUpdationValidator = async ({ id, name, description, price, 
   validatePresence('description', description, errors);
   validateLength('description', description, { min: 10, max: 2000 }, errors);
 
-  validatePrice(price, errors);
-
   await validateUserIsOwner(id, userId, errors)
 
   return errors;
-}
-
-function validatePrice(price, errors) {
-  if(typeof price === 'number' && price >= 0) { return; }
-
-  errors.push({
-    code: 422,
-    message: "price must be present and greater than or equal to 0",
-    location: "price"
-  });
 }
 
 async function validateUserIsOwner(id, userId, errors) {

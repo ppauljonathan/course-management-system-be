@@ -5,7 +5,6 @@ const courseType = `
     id: ID!
     name: String!
     description: String
-    price: Float!
     created_at: String!
     updated_at: String!
     live: Boolean!
