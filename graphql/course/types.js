@@ -9,6 +9,7 @@ const courseType = `
     updated_at: String!
     live: Boolean!
     user: User
+    chapters: [Chapter]
   }
 `;
 
