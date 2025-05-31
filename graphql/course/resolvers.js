@@ -1,7 +1,5 @@
 'use strict';
 
-const { parse } = require('graphql');
-
 const Course = require('../../models/course');
 const { getAuthenticatedUser } = require('../../services/auth');
 const { containsSelection } = require('../helpers');

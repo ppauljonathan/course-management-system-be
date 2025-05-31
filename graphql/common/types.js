@@ -12,6 +12,7 @@ const pageInfoType = `
 const paginationResponseType = `
   type PaginationResponse {
     courses: [Course]
+    chapters: [Chapter]
     pageInfo: PageInfo!
   }
 `;

@@ -4,7 +4,7 @@ const chapterCreateInputType = `
   input ChapterCreateInput {
     title: String!
     content: String!
-    course_id: ID!
+    courseId: ID!
   }
 `;
 
