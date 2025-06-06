@@ -9,7 +9,7 @@ const chapterCreateInputType = `
 `;
 
 const chapterUpdateInputType = `
-  input chapterUpdateInput {
+  input ChapterUpdateInput {
     id: ID!
     title: String!
     content: String!

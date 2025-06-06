@@ -2,7 +2,7 @@
 
 const mutations = `
   chapterCreate(chapter: ChapterCreateInput!): ChapterMutationResponse!
-  chapterUpdate(chapter: ChapterCreateInput!): ChapterMutationResponse!
+  chapterUpdate(chapter: ChapterUpdateInput!): ChapterMutationResponse!
   chapterDelete(id: ID!): ChapterMutationResponse!
 `;
 

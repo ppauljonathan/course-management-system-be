@@ -7,7 +7,7 @@ const chapterType = `
     content: String!
     created_at: String!
     updated_at: String!
-    course: Course!
+    course: Course
   }
 `;
 
