@@ -15,8 +15,7 @@ const createdCourses = async({page, per}, context, info) => {
   return await Course.findByUserId(context.user.id, page, per, withUser);
 }
 
-const course = async ({ id }, context, info) => {
-  getAuthenticatedUser(context);
+const course = async ({ id }, _context, info) => {
   const withUser = containsSelection(info, 'user');
   return await Course.find(id, withUser);
 };

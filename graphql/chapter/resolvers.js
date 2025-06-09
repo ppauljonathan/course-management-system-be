@@ -8,8 +8,7 @@ const chapters = async ({ courseId, page, per }, _context, _info) => {
   return await Chapter.findByCourseId(courseId, page, per);
 }
 
-const chapter = async ({ id }, context, _info) => {
-  getAuthenticatedUser(context);
+const chapter = async ({ id }, _context, _info) => {
   return await Chapter.find(id);
 }
 
