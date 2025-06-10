@@ -17,6 +17,7 @@ module.exports.courseCreationValidator = ({ name, description }) => {
 
 module.exports.courseUpdationValidator = async ({ id, name, description, userId }) => {
   const errors = [];
+
   validatePresence('id', id, errors);
 
   validatePresence('name', name, errors);
@@ -42,7 +43,7 @@ async function validateUserIsOwner(id, userId, errors) {
   const result = await db.query(query, variables);
   const dbUserId = parseInt(result.rows[0].user_id, 10);
 
-  if(userId === dbUserId) { return; }
+  if (userId === dbUserId) { return; }
 
 
   errors.push({

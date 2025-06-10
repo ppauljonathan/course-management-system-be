@@ -14,14 +14,19 @@ const chapter = async ({ id }, _context, _info) => {
 
 const chapterCreate = async ({ chapter }, context, _info) => {
   getAuthenticatedUser(context);
-
   return await Chapter.create(chapter, context.user.id);
+}
+
+const chapterUpdate = async ({ chapter }, context, _info) => {
+  getAuthenticatedUser(context);
+  return await Chapter.update(chapter, context.user.id);
 }
 
 const resolvers = {
   chapters,
   chapter,
-  chapterCreate
+  chapterCreate,
+  chapterUpdate
 };
 
 module.exports = resolvers;

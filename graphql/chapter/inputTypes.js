@@ -13,6 +13,7 @@ const chapterUpdateInputType = `
     id: ID!
     title: String!
     content: String!
+    courseId: ID!
   }
 `;
 

@@ -3,7 +3,7 @@
 const db = require('../config/database');
 const { PER_PAGE } = require('../constants');
 const { dbLogger } = require('../services/db');
-const { chapterCreationValidator } = require('../validators/chapter');
+const { chapterCreationValidator, chapterUpdationValidator } = require('../validators/chapter');
 const { findWithPagination } = require('./concerns/pagination');
 const { calculateCurrentTime } = require('./concerns/time');
 
@@ -40,7 +40,7 @@ module.exports.find = async (id) => {
 module.exports.create = async ({ title, content, courseId }, userId) => {
   const errors = await chapterCreationValidator({ title, content, courseId, userId });
 
-  if(errors.length != 0) {
+  if (errors.length != 0) {
     return { errors };
   }
 
@@ -61,11 +61,30 @@ module.exports.create = async ({ title, content, courseId }, userId) => {
   return { chapter, errors }
 };
 
-module.exports.update = async({id}, courseId) => {
+module.exports.update = async ({ id, title, content, courseId }, userId) => {
+  const errors = await chapterUpdationValidator({ id, title, content, courseId, userId });
 
+  if (errors.length != 0) {
+    return { errors };
+  }
+
+  const query = `
+    UPDATE chapters
+    SET title = $1, content = $2, updated_at = $3
+    WHERE id = $4
+    RETURNING *
+  `;
+  const variables = [title, content, calculateCurrentTime(), id];
+
+  dbLogger(query, variables);
+
+  const result = await db.query(query, variables);
+  const chapter = result.rows[0] || null;
+
+  return { chapter, errors }
 };
 
-module.exports.destroy = async(id) => {
+module.exports.destroy = async (id) => {
   const query = `
     DELETE FROM chapters
     WHERE id = $1
