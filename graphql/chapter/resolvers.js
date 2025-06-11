@@ -22,11 +22,17 @@ const chapterUpdate = async ({ chapter }, context, _info) => {
   return await Chapter.update(chapter, context.user.id);
 }
 
+const chapterDelete = async ({ id }, context, _info) => {
+  getAuthenticatedUser(context);
+  return await Chapter.destroy(id);
+}
+
 const resolvers = {
   chapters,
   chapter,
   chapterCreate,
-  chapterUpdate
+  chapterUpdate,
+  chapterDelete
 };
 
 module.exports = resolvers;
