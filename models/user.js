@@ -27,7 +27,7 @@ module.exports.find = async (id) => {
   `;
   const variables = [id];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Find User');
 
 	const result = await db.query(query, variables);
 	return result.rows[0] || null;
@@ -40,7 +40,7 @@ module.exports.findByEmail = async (email) => {
   `;
   const variables = [email]
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Find User by Email');
 
 	const result = await db.query(query, variables);
 	return result.rows[0] || null;
@@ -55,7 +55,7 @@ module.exports.findByResetToken = async (token) => {
   `;
   const variables = [token];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Find User by reset token');
 
 	const result = await db.query(query, variables);
 	return result.rows[0] || null;
@@ -81,7 +81,7 @@ module.exports.create = async (userData) => {
     currentTime
   ];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Create user');
 
 	const result = await db.query(query, variables);
 	const user = result.rows[0]
@@ -102,36 +102,36 @@ module.exports.generateResetPasswordToken = async (id) => {
   `;
   const variables = [resetToken, resetTokenExpiresAt, currentTime, id];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'generate Reset Password Token');
 
-	const result = await db.query(query, variables);
+  const result = await db.query(query, variables);
 
-	const user = result.rows[0] || null;
+  const user = result.rows[0] || null;
 
-	return { user, errors: [] };
+  return { user, errors: [] };
 }
 
 module.exports.resetPassword = async (userData) => {
-	const user = await this.findByResetToken(userData.token);
-	const errors = [];
-	if(!user) {
-		errors.push({
-			code: 404,
-			message: "unable to find user with reset token",
-			location: 'token'
-		});
-		return { errors };
-	}
+  const user = await this.findByResetToken(userData.token);
+  const errors = [];
+  if(!user) {
+    errors.push({
+      code: 404,
+      message: "unable to find user with reset token",
+      location: 'token'
+    });
+    return { errors };
+  }
 
-	const currentTime = calculateCurrentTime();
-	if(user.reset_token_expires_at < currentTime) {
-		errors.push({
-			code: 422,
-			message: "Reset Token has expired",
-			location: 'token'
-		});
-		return { errors };
-	}
+  const currentTime = calculateCurrentTime();
+  if(user.reset_token_expires_at < currentTime) {
+    errors.push({
+      code: 422,
+      message: "Reset Token has expired",
+      location: 'token'
+    });
+    return { errors };
+  }
 
   const query = `
     UPDATE users
@@ -141,10 +141,10 @@ module.exports.resetPassword = async (userData) => {
   `
   const variables = [userData.password_hash, null, null, currentTime, user.id];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Set New Password');
 
-	const result = await db.query(query, variables);
-	const updatedUser = result.rows[0];
+  const result = await db.query(query, variables);
+  const updatedUser = result.rows[0];
 
-	return { user: updatedUser, errors };
+  return { user: updatedUser, errors };
 };

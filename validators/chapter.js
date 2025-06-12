@@ -51,7 +51,7 @@ async function validateCourseExistsAndUserIsCreator(courseId, userId, errors) {
   `;
   const variables = [courseId];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Validate chapter\'s course exists and the user is the course owner');
 
   const result = await db.query(query, variables);
 
