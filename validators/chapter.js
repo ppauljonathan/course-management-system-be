@@ -20,7 +20,6 @@ module.exports.chapterCreationValidator = async ({ title, content, courseId, use
 }
 
 module.exports.chapterUpdationValidator = async ({ id, title, content, courseId, userId }) => {
-  console.log(id, title, content, courseId, userId)
   const errors = [];
 
   validatePresence('id', id, errors);
@@ -37,8 +36,14 @@ module.exports.chapterUpdationValidator = async ({ id, title, content, courseId,
   return errors;
 }
 
+module.exports.chapterDeletionValidator = async ({ id, courseId, userId }) => {
+  const errors = [];
+  await validateCourseExistsAndUserIsCreator(courseId, userId, errors);
+
+  return errors
+}
+
 async function validateCourseExistsAndUserIsCreator(courseId, userId, errors) {
-  console.log(courseId, userId)
   const query = `
     SELECT id, user_id
     FROM courses

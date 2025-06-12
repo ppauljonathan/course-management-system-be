@@ -3,7 +3,7 @@
 const db = require('../config/database');
 const { PER_PAGE } = require('../constants');
 const { dbLogger } = require('../services/db');
-const { courseCreationValidator, courseUpdationValidator } = require('../validators/course');
+const { courseCreationValidator, courseUpdationValidator, courseDeletionValidator } = require('../validators/course');
 const { findWithPagination } = require('./concerns/pagination');
 const { calculateCurrentTime } = require('./concerns/time');
 const User = require('./user');
@@ -20,7 +20,7 @@ module.exports.findAll = async (page = 1, per = PER_PAGE, withUser = false) => {
     per
   );
 
-  if(!withUser) { return coursesData; }
+  if (!withUser) { return coursesData; }
 
   coursesData.courses = await preloadUsers(coursesData.courses);
   return coursesData;
@@ -38,7 +38,7 @@ module.exports.findByUserId = async (userId, page = 1, per = PER_PAGE, withUser 
     per
   );
 
-  if(!withUser) { return coursesData; }
+  if (!withUser) { return coursesData; }
   const user = await User.find(userId);
   coursesData.courses = coursesData.courses.map((course) => ({ ...course, user }));
 
@@ -57,8 +57,8 @@ module.exports.find = async (id, withUser = false) => {
   const result = await db.query(query, variables);
   const course = result.rows[0] || null;
 
-  if(!course) { return; }
-  if(!withUser) { return course; }
+  if (!course) { return; }
+  if (!withUser) { return course; }
 
   const user = await User.find(course.user_id);
   course.user = user;
@@ -113,7 +113,13 @@ module.exports.update = async ({ id, name, description, live }, userId) => {
   return { course, errors };
 };
 
-module.exports.destroy = async (id) => {
+module.exports.destroy = async (id, userId) => {
+  const errors = await courseDeletionValidator({ id, userId });
+
+  if (errors.length != 0) {
+    return { errors };
+  }
+
   const query = `
     UPDATE courses
     SET deleted_at = $1

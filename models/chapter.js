@@ -3,9 +3,10 @@
 const db = require('../config/database');
 const { PER_PAGE } = require('../constants');
 const { dbLogger } = require('../services/db');
-const { chapterCreationValidator, chapterUpdationValidator } = require('../validators/chapter');
+const { chapterCreationValidator, chapterUpdationValidator, chapterDeletionValidator } = require('../validators/chapter');
 const { findWithPagination } = require('./concerns/pagination');
 const { calculateCurrentTime } = require('./concerns/time');
+const Course = require('./course');
 
 module.exports.findByCourseId = async (courseId, page = 1, per = PER_PAGE) => {
   const chaptersData = await findWithPagination(
@@ -22,7 +23,7 @@ module.exports.findByCourseId = async (courseId, page = 1, per = PER_PAGE) => {
 };
 
 
-module.exports.find = async (id) => {
+module.exports.find = async (id, withCourse = false) => {
   const query = `
     SELECT *
     FROM chapters
@@ -33,8 +34,15 @@ module.exports.find = async (id) => {
   dbLogger(query, variables);
 
   const result = await db.query(query, variables);
+  const chapter = result.rows[0] || null;
 
-  return result.rows[0] || null;
+  if(!chapter) { return; }
+  if(!withCourse) { return chapter; }
+
+  const course = await Course.find(chapter.course_id, true);
+  chapter.course = course;
+
+  return chapter;
 }
 
 module.exports.create = async ({ title, content, courseId }, userId) => {
@@ -84,7 +92,13 @@ module.exports.update = async ({ id, title, content, courseId }, userId) => {
   return { chapter, errors }
 };
 
-module.exports.destroy = async (id) => {
+module.exports.destroy = async (id, courseId, userId) => {
+  const errors = await chapterDeletionValidator({id, courseId, userId});
+
+  if(errors.length != 0) {
+    return { errors }
+  }
+
   const query = `
     DELETE FROM chapters
     WHERE id = $1

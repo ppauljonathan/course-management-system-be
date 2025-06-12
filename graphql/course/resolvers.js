@@ -32,7 +32,7 @@ const courseUpdate = async ({ course }, context) => {
 
 const courseDelete = async ({ id }, context) => {
   getAuthenticatedUser(context);
-  return await Course.destroy(id);
+  return await Course.destroy(id, context.user.id);
 };
 
 const resolvers = {

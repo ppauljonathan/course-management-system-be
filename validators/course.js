@@ -30,6 +30,14 @@ module.exports.courseUpdationValidator = async ({ id, name, description, userId 
   return errors;
 }
 
+module.exports.courseDeletionValidator = async ({ id, userId }) => {
+  const errors = [];
+
+  await validateUserIsOwner(id, userId, errors);
+
+  return errors
+}
+
 async function validateUserIsOwner(id, userId, errors) {
   const query = `
     SELECT user_id
