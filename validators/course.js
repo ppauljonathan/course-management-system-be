@@ -46,7 +46,7 @@ async function validateUserIsOwner(id, userId, errors) {
   `;
   const variables = [id];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Validate User is course Owner');
 
   const result = await db.query(query, variables);
   const dbUserId = parseInt(result.rows[0].user_id, 10);

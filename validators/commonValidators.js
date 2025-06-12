@@ -54,7 +54,7 @@ module.exports.validateUniquness = async (key, value, tableName, errors = []) =>
   `;
   const variables = [value];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, `Validate Uniqueness of ${key} in ${tableName}`);
 
   const result = await db.query(query, variables);
   const count = parseInt(result.rows[0].count, 10);

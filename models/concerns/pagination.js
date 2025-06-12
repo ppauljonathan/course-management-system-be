@@ -21,7 +21,7 @@ module.exports.findWithPagination = async (
 		OFFSET ${(page - 1) * per}
   `;
 
-  dbLogger(query, conditionVars);
+  dbLogger(query, conditionVars, `Fetch Paginated Data from ${table}`);
 
 	const result = await db.query(query, conditionVars);
 	const pageInfo = await this.pageInfo(
@@ -43,7 +43,7 @@ module.exports.pageInfo = async (
 		WHERE ${conditionString}
 	`;
 
-  dbLogger(query, conditionVars);
+  dbLogger(query, conditionVars, 'fetching pageInfo');
 
 	const result = await db.query(query, conditionVars);
 

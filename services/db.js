@@ -12,9 +12,11 @@ const validateIdentifier = (type, name) => {
 module.exports.validateTableName = (tableName) => validateIdentifier("table name", tableName);
 module.exports.validateColumnName = (column) => validateIdentifier("column name", column);
 
-module.exports.dbLogger = (query = '', variables = []) => {
+module.exports.dbLogger = (query = '', variables = [], description = '') => {
   if(process.env.LOG_LEVEL >= 2) {
     console.log(`[DB]
+  [description]
+    ${description}
   [query]
     ${query}
   [variables]

@@ -31,7 +31,7 @@ module.exports.find = async (id, withCourse = false) => {
   `;
   const variables = [id];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Find Chapter');
 
   const result = await db.query(query, variables);
   const chapter = result.rows[0] || null;
@@ -61,10 +61,12 @@ module.exports.create = async ({ title, content, courseId }, userId) => {
   `;
   const variables = [title, content, currentTime, currentTime, courseId];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Create Chapter');
 
   const result = await db.query(query, variables);
   const chapter = result.rows[0];
+
+  await addChapterToCourse(chapter.id, courseId, errors);
 
   return { chapter, errors }
 };
@@ -84,7 +86,7 @@ module.exports.update = async ({ id, title, content, courseId }, userId) => {
   `;
   const variables = [title, content, calculateCurrentTime(), id];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Update Chapter');
 
   const result = await db.query(query, variables);
   const chapter = result.rows[0] || null;
@@ -106,10 +108,54 @@ module.exports.destroy = async (id, courseId, userId) => {
   `;
   const variables = [id];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Delete Chapter');
 
   const result = await db.query(query, variables);
   const chapter = result.rows[0] || null;
 
+  await removeChapterFromCourse(id, courseId, errors);
+
   return { chapter, errors: [] };
 };
+
+async function addChapterToCourse(id, courseId, errors) {
+  const query = `
+    UPDATE courses
+    SET chapter_order = array_append(chapter_order, $1)
+    WHERE id = $2
+  `;
+  const variables = [id, courseId];
+
+  dbLogger(query, variables, 'Add chapter to course');
+
+  const result = await db.query(query, variables);
+
+  if(result.rowCount == 0) {
+    errors.append({
+      code: 500,
+      message: 'Error Occured while associating chapter with course',
+      field: 'title'
+    });
+  }
+}
+
+async function removeChapterFromCourse(id, courseId, errors) {
+  const query = `
+    UPDATE courses
+    SET chapter_order = array_remove(chapter_order, $1)
+    WHERE id = $2
+  `;
+  const variables = [id, courseId];
+
+  dbLogger(query, variables, 'Remove Chapter from Course');
+
+  const result = await db.query(query, variables);
+
+  if(result.rowCount == 0) {
+    errors.append({
+      code: 500,
+      message: 'Error Occured while removing chapter from course',
+      field: 'title'
+    });
+  }
+}
