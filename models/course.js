@@ -45,14 +45,14 @@ module.exports.findByUserId = async (userId, page = 1, per = PER_PAGE, withUser 
   return coursesData;
 };
 
-module.exports.find = async (id, withUser = false) => {
+module.exports.find = async (id, withUser = false, withChapters = false) => {
   const query = `
     SELECT * FROM courses
     WHERE id = $1 AND deleted_at IS NULL
   `;
   const variables = [id];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Find Course');
 
   const result = await db.query(query, variables);
   const course = result.rows[0] || null;
@@ -62,6 +62,8 @@ module.exports.find = async (id, withUser = false) => {
 
   const user = await User.find(course.user_id);
   course.user = user;
+
+  if(withChapters) { course.chapters = await findChaptersInOrder(course.chapter_order); }
 
   return course;
 };
@@ -82,7 +84,7 @@ module.exports.create = async ({ name, description, live }, userId) => {
   `;
   const variables = [name, description, currentTime, currentTime, live, userId];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Create Course');
 
   const result = await db.query(query, variables);
   const course = result.rows[0];
@@ -105,7 +107,7 @@ module.exports.update = async ({ id, name, description, live }, userId) => {
   `;
   const variables = [name, description, calculateCurrentTime(), live, id];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Update Course');
 
   const result = await db.query(query, variables);
   const course = result.rows[0] || null;
@@ -128,7 +130,7 @@ module.exports.destroy = async (id, userId) => {
   `;
   const variables = [calculateCurrentTime(), id];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Delete Course');
 
   const result = await db.query(query, variables);
   const course = result.rows[0] || null;
@@ -145,7 +147,7 @@ async function preloadUsers(courses) {
   `;
   const variables = [userIds];
 
-  dbLogger(query, variables);
+  dbLogger(query, variables, 'Preloading users');
 
   const result = await db.query(query, variables);
 
@@ -157,3 +159,20 @@ async function preloadUsers(courses) {
   courses = courses.map((course) => ({ ...course, user: userIdMapping[course.user_id] }));
   return courses;
 }
+
+async function findChaptersInOrder(chapter_order) {
+  const query = `
+    SELECT *
+    FROM chapters
+    WHERE id = ANY($1)
+    ORDER BY array_position($1, id)
+  `;
+
+  const variables = [chapter_order]
+
+  dbLogger(query, variables, 'Find Chapters of Course');
+
+  const result = await db.query(query, variables);
+  return result.rows || [];
+}
+
