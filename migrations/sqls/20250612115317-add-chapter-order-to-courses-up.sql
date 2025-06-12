@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS courses
+ADD COLUMN chapter_order INTEGER[];

@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS courses
+DROP COLUMN IF EXISTS chapter_order;
