@@ -9,14 +9,17 @@ const { calculateCurrentTime } = require('./concerns/time');
 const Course = require('./course');
 
 module.exports.findByCourseId = async (courseId, page = 1, per = PER_PAGE) => {
+  const chapterOrder = await findChapterOrder(courseId)
   const chaptersData = await findWithPagination(
     'chapters',
     `
       course_id = $1
+      AND id = ANY($2)
     `,
-    [courseId],
+    [courseId, chapterOrder],
     page,
-    per
+    per,
+    'array_position($2, id)'
   )
 
   return chaptersData;
@@ -159,3 +162,18 @@ async function removeChapterFromCourse(id, courseId, errors) {
     });
   }
 }
+
+async function findChapterOrder(courseId) {
+  const query = `
+    SELECT chapter_order
+    FROM courses
+    WHERE id = $1
+  `;
+  const variables = [courseId];
+  dbLogger(query, variables, 'Fetch Chapter Order');
+
+  const result = await db.query(query, variables);
+
+  return result.rows[0].chapter_order;
+}
+

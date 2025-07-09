@@ -9,14 +9,15 @@ module.exports.findWithPagination = async (
 	conditionString = 'deleted_at IS NULL',
 	conditionVars = [],
 	page = DEFAULT_PAGE,
-	per = PER_PAGE
+	per = PER_PAGE,
+  orderClause = 'id ASC'
 ) => {
 	per = Math.min(per, MAX_PER_PAGE);
 
 	const query = `
 		SELECT * from ${validateTableName(table)}
 		WHERE ${conditionString}
-		ORDER BY id ASC
+		ORDER BY ${orderClause}
 		LIMIT ${per}
 		OFFSET ${(page - 1) * per}
   `;
