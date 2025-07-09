@@ -17,8 +17,7 @@ const createdCourses = async({page, per}, context, info) => {
 
 const course = async ({ id }, _context, info) => {
   const withUser = containsSelection(info, 'user');
-  const withChapters = containsSelection(info, 'chapters')
-  return await Course.find(id, withUser, withChapters);
+  return await Course.find(id, withUser);
 };
 
 const courseCreate = async ({ course }, context) => {

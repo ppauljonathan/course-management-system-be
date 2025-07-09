@@ -45,7 +45,7 @@ module.exports.findByUserId = async (userId, page = 1, per = PER_PAGE, withUser 
   return coursesData;
 };
 
-module.exports.find = async (id, withUser = false, withChapters = false) => {
+module.exports.find = async (id, withUser = false) => {
   const query = `
     SELECT * FROM courses
     WHERE id = $1 AND deleted_at IS NULL
@@ -62,8 +62,6 @@ module.exports.find = async (id, withUser = false, withChapters = false) => {
 
   const user = await User.find(course.user_id);
   course.user = user;
-
-  if(withChapters) { course.chapters = await findChaptersInOrder(course.chapter_order); }
 
   return course;
 };
@@ -159,20 +157,3 @@ async function preloadUsers(courses) {
   courses = courses.map((course) => ({ ...course, user: userIdMapping[course.user_id] }));
   return courses;
 }
-
-async function findChaptersInOrder(chapter_order) {
-  const query = `
-    SELECT *
-    FROM chapters
-    WHERE id = ANY($1)
-    ORDER BY array_position($1, id)
-  `;
-
-  const variables = [chapter_order]
-
-  dbLogger(query, variables, 'Find Chapters of Course');
-
-  const result = await db.query(query, variables);
-  return result.rows || [];
-}
-
