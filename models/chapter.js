@@ -137,7 +137,7 @@ async function addChapterToCourse(id, courseId, errors) {
     errors.append({
       code: 500,
       message: 'Error Occured while associating chapter with course',
-      field: 'title'
+      location: 'title'
     });
   }
 }
@@ -158,7 +158,7 @@ async function removeChapterFromCourse(id, courseId, errors) {
     errors.append({
       code: 500,
       message: 'Error Occured while removing chapter from course',
-      field: 'title'
+      location: 'title'
     });
   }
 }

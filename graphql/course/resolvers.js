@@ -4,12 +4,12 @@ const Course = require('../../models/course');
 const { getAuthenticatedUser } = require('../../services/auth');
 const { containsSelection } = require('../helpers');
 
-const courses = async ({page, per}, _context, info) => {
+const courses = async ({ page, per }, _context, info) => {
   const withUser = containsSelection(info, 'user');
   return await Course.findAll(page, per, withUser);
 };
 
-const createdCourses = async({page, per}, context, info) => {
+const createdCourses = async ({ page, per }, context, info) => {
   getAuthenticatedUser(context);
   const withUser = containsSelection(info, 'user');
   return await Course.findByUserId(context.user.id, page, per, withUser);
@@ -35,13 +35,19 @@ const courseDelete = async ({ id }, context) => {
   return await Course.destroy(id, context.user.id);
 };
 
+const updateChapterOrder = async ({ id, chapterOrder }, context) => {
+  getAuthenticatedUser(context);
+  return await Course.updateChapterOrder(id, chapterOrder);
+}
+
 const resolvers = {
   courses,
   createdCourses,
   course,
   courseCreate,
   courseUpdate,
-  courseDelete
+  courseDelete,
+  updateChapterOrder
 }
 
 module.exports = resolvers;

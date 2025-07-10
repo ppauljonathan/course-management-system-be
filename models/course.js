@@ -3,7 +3,7 @@
 const db = require('../config/database');
 const { PER_PAGE } = require('../constants');
 const { dbLogger } = require('../services/db');
-const { courseCreationValidator, courseUpdationValidator, courseDeletionValidator } = require('../validators/course');
+const { courseCreationValidator, courseUpdationValidator, courseDeletionValidator, chapterOrderUpdationValidator } = require('../validators/course');
 const { findWithPagination } = require('./concerns/pagination');
 const { calculateCurrentTime } = require('./concerns/time');
 const User = require('./user');
@@ -135,6 +135,48 @@ module.exports.destroy = async (id, userId) => {
 
   return { course, errors: [] };
 };
+
+module.exports.updateChapterOrder = async (id, chapterOrder) => {
+  const course = await this.find(id);
+  const errors = [];
+
+  const sortedExisting = [...course.chapter_order].sort().join(',');
+  const sortedNew = [...chapterOrder].sort().join(',');
+
+  if (sortedExisting !== sortedNew) {
+    errors.push({
+      code: 422,
+      location: 'chapter_order',
+      message: 'chapter order is invalid'
+    });
+  }
+
+  if (errors.length != 0) {
+    return { errors };
+  }
+
+  const query = `
+    UPDATE courses
+    SET chapter_order = $1
+    WHERE id = $2
+    RETURNING *
+  `;
+  const variables = [chapterOrder, id];
+
+  dbLogger(query, variables, 'update chapter order');
+
+  const result = await db.query(query, variables);
+
+  if (result.rowCount == 0) {
+    errors.append({
+      code: 500,
+      message: 'Error Occured while updating chapter order',
+      location: 'chapter_order'
+    })
+  }
+
+  return { course: result.rows[0], errors }
+}
 
 async function preloadUsers(courses) {
   const userIds = [... new Set(courses.map(c => c.user_id))];
