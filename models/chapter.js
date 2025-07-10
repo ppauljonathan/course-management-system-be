@@ -174,6 +174,8 @@ async function findChapterOrder(courseId) {
 
   const result = await db.query(query, variables);
 
+  if(result.rowCount == 0) { return []; }
+
   return result.rows[0].chapter_order;
 }
 

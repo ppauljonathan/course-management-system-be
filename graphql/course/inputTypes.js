@@ -14,6 +14,7 @@ const courseUpdateInputType = `
 		name: String!,
 		description: String!,
     live: Boolean,
+    chapter_order: [Int]
 	}
 `;
 
