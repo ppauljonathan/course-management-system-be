@@ -1,8 +1,8 @@
 'use strict';
 
 const queries = `
-  courses(page: Int, per: Int): PaginationResponse!
-  createdCourses(page: Int, per: Int): PaginationResponse!
+  courses(page: Int, per: Int, searchTerm: String): PaginationResponse!
+  createdCourses(page: Int, per: Int, searchTerm: String): PaginationResponse!
   course(id: ID!): Course
 `;
 

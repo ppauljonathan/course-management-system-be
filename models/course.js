@@ -8,14 +8,24 @@ const { findWithPagination } = require('./concerns/pagination');
 const { calculateCurrentTime } = require('./concerns/time');
 const User = require('./user');
 
-module.exports.findAll = async (page = 1, per = PER_PAGE, withUser = false) => {
+module.exports.findAll = async (page = 1, per = PER_PAGE, withUser = false, searchTerm = null) => {
+  let searchQuery = `
+    live = $1 AND
+    deleted_at IS NULL
+  `;
+  const searchVariables = [true];
+
+  if (searchTerm) {
+    searchQuery += ` AND
+      (name ILIKE $2 OR description ILIKE $2)
+    `;
+    searchVariables.push(`%${searchTerm}%`);
+  }
+
   const coursesData = await findWithPagination(
     'courses',
-    `
-      live = $1 AND
-      deleted_at IS NULL
-    `,
-    [true],
+    searchQuery,
+    searchVariables,
     page,
     per
   );
@@ -26,14 +36,23 @@ module.exports.findAll = async (page = 1, per = PER_PAGE, withUser = false) => {
   return coursesData;
 };
 
-module.exports.findByUserId = async (userId, page = 1, per = PER_PAGE, withUser = false) => {
+module.exports.findByUserId = async (userId, page = 1, per = PER_PAGE, withUser = false, searchTerm = null) => {
+  let searchQuery = `
+    user_id = $1 AND
+    deleted_at IS NULL
+  `;
+  const searchVariables = [userId];
+
+  if (searchTerm) {
+    searchQuery += ` AND
+      (name ILIKE $2 OR description ILIKE $2)
+    `;
+    searchVariables.push(`%${searchTerm}%`);
+  }
   const coursesData = await findWithPagination(
     'courses',
-    `
-      user_id = $1 AND
-      deleted_at IS NULL
-    `,
-    [userId],
+    searchQuery,
+    searchVariables,
     page,
     per
   );

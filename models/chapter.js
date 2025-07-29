@@ -39,8 +39,8 @@ module.exports.find = async (id, withCourse = false) => {
   const result = await db.query(query, variables);
   const chapter = result.rows[0] || null;
 
-  if(!chapter) { return; }
-  if(!withCourse) { return chapter; }
+  if (!chapter) { return; }
+  if (!withCourse) { return chapter; }
 
   const course = await Course.find(chapter.course_id, true);
   chapter.course = course;
@@ -98,9 +98,9 @@ module.exports.update = async ({ id, title, content, courseId }, userId) => {
 };
 
 module.exports.destroy = async (id, courseId, userId) => {
-  const errors = await chapterDeletionValidator({id, courseId, userId});
+  const errors = await chapterDeletionValidator({ id, courseId, userId });
 
-  if(errors.length != 0) {
+  if (errors.length != 0) {
     return { errors }
   }
 
@@ -133,7 +133,7 @@ async function addChapterToCourse(id, courseId, errors) {
 
   const result = await db.query(query, variables);
 
-  if(result.rowCount == 0) {
+  if (result.rowCount == 0) {
     errors.append({
       code: 500,
       message: 'Error Occured while associating chapter with course',
@@ -154,7 +154,7 @@ async function removeChapterFromCourse(id, courseId, errors) {
 
   const result = await db.query(query, variables);
 
-  if(result.rowCount == 0) {
+  if (result.rowCount == 0) {
     errors.append({
       code: 500,
       message: 'Error Occured while removing chapter from course',
@@ -174,7 +174,7 @@ async function findChapterOrder(courseId) {
 
   const result = await db.query(query, variables);
 
-  if(result.rowCount == 0) { return []; }
+  if (result.rowCount == 0) { return []; }
 
   return result.rows[0].chapter_order;
 }
