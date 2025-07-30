@@ -13,6 +13,7 @@ const paginationResponseType = `
   type PaginationResponse {
     courses: [Course]
     chapters: [Chapter]
+    users: [User]
     pageInfo: PageInfo!
   }
 `;
