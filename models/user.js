@@ -36,6 +36,22 @@ module.exports.findAll = async (page = 1, per = PER_PAGE, searchTerm = null) => 
   );
 };
 
+module.exports.findByIds = async (ids, page = 1, per = PER_PAGE) => {
+  let searchQuery = `
+    id = ANY($1) AND
+    deleted_at IS NULL
+  `;
+  const searchVariables = [ids];
+
+  return findWithPagination(
+    'users',
+    searchQuery,
+    searchVariables,
+    page,
+    per
+  );
+}
+
 module.exports.find = async (id) => {
   const query = `
     SELECT * FROM users

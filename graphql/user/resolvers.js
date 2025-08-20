@@ -33,13 +33,18 @@ const users = async ({ page, per, searchTerm }, _context, _info) => {
   return await User.findAll(page, per, searchTerm);
 }
 
+const usersByIds = async ({ page, per, ids }, _context, _info) => {
+  return await User.findByIds(ids, page, per);
+}
+
 const resolvers = {
   signup,
   login,
   requestPasswordReset,
   resetPassword,
   me,
-  users
+  users,
+  usersByIds,
 };
 
 module.exports = resolvers;
