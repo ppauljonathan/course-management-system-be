@@ -24,23 +24,23 @@ app.use(graphqlLogger);
 app.use(authenticateUser);
 
 app.all(
-	'/graphql',
-	createHandler({
-		schema: schema,
-		rootValue: rootValue,
-		context: context
-	}),
+  '/graphql',
+  createHandler({
+    schema: schema,
+    rootValue: rootValue,
+    context: context
+  }),
 );
 
 app.get('/', (_req, res) => {
-	res.type('html');
-	res.end(ruruHTML({ endpoint: '/graphql' }));
+  res.type('html');
+  res.end(ruruHTML({ endpoint: '/graphql' }));
 });
 
 db.connect()
-	.then(() => {
-		console.log('Connected to DB');
-		app.listen(PORT, () => {
-			console.log(`Listening on ${PORT}`);
-		});
-	});
+  .then(() => {
+    console.log('Connected to DB');
+    app.listen(PORT, () => {
+      console.log(`Listening on ${PORT}`);
+    });
+  });
