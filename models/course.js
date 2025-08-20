@@ -8,18 +8,30 @@ const { findWithPagination } = require('./concerns/pagination');
 const { calculateCurrentTime } = require('./concerns/time');
 const User = require('./user');
 
-module.exports.findAll = async (page = 1, per = PER_PAGE, withUser = false, searchTerm = null) => {
+module.exports.findAll = async (
+  page = 1,
+  per = PER_PAGE,
+  withUser = false,
+  searchTerm = '',
+  userIds = []
+) => {
   let searchQuery = `
-    live = $1 AND
-    deleted_at IS NULL
+    live = $1
+    AND deleted_at IS NULL
   `;
   const searchVariables = [true];
+  let varIndex = 2;
 
   if (searchTerm) {
-    searchQuery += ` AND
-      (name ILIKE $2 OR description ILIKE $2)
-    `;
+    searchQuery += ` AND (name ILIKE $${varIndex} OR description ILIKE $${varIndex})`;
     searchVariables.push(`%${searchTerm}%`);
+    varIndex++;
+  }
+
+  if (userIds && userIds.length > 0) {
+    searchQuery += ` AND user_id = ANY($${varIndex})`;
+    searchVariables.push(userIds);
+    varIndex++;
   }
 
   const coursesData = await findWithPagination(
@@ -30,7 +42,7 @@ module.exports.findAll = async (page = 1, per = PER_PAGE, withUser = false, sear
     per
   );
 
-  if (!withUser) { return coursesData; }
+  if (!withUser) return coursesData;
 
   coursesData.courses = await preloadUsers(coursesData.courses);
   return coursesData;
