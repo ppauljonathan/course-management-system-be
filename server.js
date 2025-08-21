@@ -37,10 +37,16 @@ app.get('/', (_req, res) => {
   res.end(ruruHTML({ endpoint: '/graphql' }));
 });
 
-db.connect()
-  .then(() => {
-    console.log('Connected to DB');
-    app.listen(PORT, () => {
-      console.log(`Listening on ${PORT}`);
+// export app for Vercel
+module.exports = app;
+
+// only start server locally
+if (require.main === module) {
+  db.connect()
+    .then(() => {
+      console.log('Connected to DB');
+      app.listen(PORT, () => {
+        console.log(`Listening on ${PORT}`);
+      });
     });
-  });
+}
