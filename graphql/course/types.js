@@ -10,6 +10,7 @@ const courseType = `
     live: Boolean!
     user: User
     chapter_order: [ID]
+    tags: [TagType]
   }
 `;
 
@@ -20,11 +21,20 @@ const courseMutationResponseType = `
   }
 `;
 
+const tagType = `
+  type TagType {
+    id: ID!,
+    name: String,
+    description: String,
+  }
+`
+
 
 
 const types =
   courseType +
-  courseMutationResponseType
-;
+  courseMutationResponseType +
+  tagType
+  ;
 
 module.exports = types;

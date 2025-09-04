@@ -6,18 +6,24 @@ const { containsSelection } = require('../helpers');
 
 const courses = async ({ page, per, searchTerm, userIds }, _context, info) => {
   const withUser = containsSelection(info, 'user');
-  return await Course.findAll(page, per, withUser, searchTerm, userIds);
+  const withTags = containsSelection(info, 'tags');
+
+  return await Course.findAll(page, per, withUser, searchTerm, userIds, withTags);
 };
 
 const createdCourses = async ({ page, per, searchTerm }, context, info) => {
   getAuthenticatedUser(context);
   const withUser = containsSelection(info, 'user');
-  return await Course.findByUserId(context.user.id, page, per, withUser, searchTerm);
+  const withTags = containsSelection(info, 'tags');
+
+  return await Course.findByUserId(context.user.id, page, per, withUser, searchTerm, withTags);
 }
 
 const course = async ({ id }, _context, info) => {
   const withUser = containsSelection(info, 'user');
-  return await Course.find(id, withUser);
+  const withTags = containsSelection(info, 'tags');
+
+  return await Course.find(id, withUser, withTags);
 };
 
 const courseCreate = async ({ course }, context) => {
