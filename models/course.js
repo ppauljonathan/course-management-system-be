@@ -3,7 +3,7 @@
 const db = require('../config/database');
 const { PER_PAGE } = require('../constants');
 const { dbLogger } = require('../services/db');
-const { courseCreationValidator, courseUpdationValidator, courseDeletionValidator, chapterOrderUpdationValidator } = require('../validators/course');
+const { courseCreationValidator, courseUpdationValidator, courseDeletionValidator } = require('../validators/course');
 const { findWithPagination } = require('./concerns/pagination');
 const { calculateCurrentTime } = require('./concerns/time');
 const User = require('./user');
@@ -13,7 +13,8 @@ module.exports.findAll = async (
   per = PER_PAGE,
   withUser = false,
   searchTerm = '',
-  userIds = []
+  userIds = [],
+  withTags = false
 ) => {
   let searchQuery = `
     live = $1
@@ -42,13 +43,25 @@ module.exports.findAll = async (
     per
   );
 
-  if (!withUser) return coursesData;
+  if (withUser) {
+    coursesData.courses = await preloadUsers(coursesData.courses);
+  }
 
-  coursesData.courses = await preloadUsers(coursesData.courses);
+  if (withTags) {
+    coursesData.courses = await preloadTags(coursesData.courses);
+  }
+
   return coursesData;
 };
 
-module.exports.findByUserId = async (userId, page = 1, per = PER_PAGE, withUser = false, searchTerm = null) => {
+module.exports.findByUserId = async (
+  userId,
+  page = 1,
+  per = PER_PAGE,
+  withUser = false,
+  searchTerm = null,
+  withTags = false
+) => {
   let searchQuery = `
     user_id = $1 AND
     deleted_at IS NULL
@@ -69,14 +82,19 @@ module.exports.findByUserId = async (userId, page = 1, per = PER_PAGE, withUser 
     per
   );
 
-  if (!withUser) { return coursesData; }
-  const user = await User.find(userId);
-  coursesData.courses = coursesData.courses.map((course) => ({ ...course, user }));
+  if (withUser) {
+    const user = await User.find(userId);
+    coursesData.courses = coursesData.courses.map((course) => ({ ...course, user }));
+  }
+
+  if (withTags) {
+    coursesData.courses = await preloadTags(coursesData.courses);
+  }
 
   return coursesData;
 };
 
-module.exports.find = async (id, withUser = false) => {
+module.exports.find = async (id, withUser = false, withTags = false) => {
   const query = `
     SELECT * FROM courses
     WHERE id = $1 AND deleted_at IS NULL
@@ -89,10 +107,15 @@ module.exports.find = async (id, withUser = false) => {
   const course = result.rows[0] || null;
 
   if (!course) { return; }
-  if (!withUser) { return course; }
 
-  const user = await User.find(course.user_id);
-  course.user = user;
+  if (withUser) {
+    const user = await User.find(course.user_id);
+    course.user = user;
+  }
+
+  if (withTags) {
+    await preloadTags([course]);
+  }
 
   return course;
 };
@@ -226,7 +249,39 @@ async function preloadUsers(courses) {
   const userIdMapping = users.reduce((acc, user) => {
     acc[user.id] = user;
     return acc;
-  }, {})
-  courses = courses.map((course) => ({ ...course, user: userIdMapping[course.user_id] }));
-  return courses;
+  }, {});
+
+  return courses.map((course) => ({ ...course, user: userIdMapping[course.user_id] }));
+}
+
+async function preloadTags(courses) {
+  const courseIds = courses.map(c => c.id);
+  const query = `
+    SELECT courses.id as course_id, tags.*
+    FROM courses
+    INNER JOIN courses_tags
+      ON courses.id = courses_tags.course_id
+    INNER JOIN tags
+      ON tags.id = courses_tags.tag_id
+    WHERE courses.id = ANY($1)
+  `;
+  const variables = [courseIds];
+
+  dbLogger(query, variables, 'Preloading tags');
+
+  const result = await db.query(query, variables);
+  const coursesTagJoin = result.rows;
+
+
+  const tagMapping = coursesTagJoin.reduce((acc, row) => {
+    const { course_id, ...rest } = row;
+    if (acc[course_id] === undefined) {
+      acc[course_id] = [];
+    }
+    acc[course_id].push(rest);
+
+    return acc;
+  }, {});
+
+  return courses.map((course) => ({ ...course, tags: tagMapping[course.id] || [] }));
 }
