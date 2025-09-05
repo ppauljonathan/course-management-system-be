@@ -222,7 +222,7 @@ module.exports.updateChapterOrder = async (id, chapterOrder) => {
   const result = await db.query(query, variables);
 
   if (result.rowCount == 0) {
-    errors.append({
+    errors.push({
       code: 500,
       message: 'Error Occured while updating chapter order',
       location: 'chapter_order'
