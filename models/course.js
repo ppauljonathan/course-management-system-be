@@ -3,7 +3,7 @@
 const db = require('../config/database');
 const { PER_PAGE } = require('../constants');
 const { dbLogger } = require('../services/db');
-const { courseCreationValidator, courseUpdationValidator, courseDeletionValidator, chapterOrderUpdationValidator } = require('../validators/course');
+const { courseCreationValidator, courseUpdationValidator, courseDeletionValidator } = require('../validators/course');
 const { findWithPagination } = require('./concerns/pagination');
 const { calculateCurrentTime } = require('./concerns/time');
 const User = require('./user');
