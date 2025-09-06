@@ -104,7 +104,7 @@ module.exports.find = async (id, withUser = false, withTags = false) => {
   dbLogger(query, variables, 'Find Course');
 
   const result = await db.query(query, variables);
-  const course = result.rows[0] || null;
+  let course = result.rows[0] || null;
 
   if (!course) { return; }
 
@@ -114,7 +114,7 @@ module.exports.find = async (id, withUser = false, withTags = false) => {
   }
 
   if (withTags) {
-    await preloadTags([course]);
+    course = (await preloadTags([course]))[0];
   }
 
   return course;
